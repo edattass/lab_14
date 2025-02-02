@@ -1,11 +1,14 @@
 package org.aeh.lab13.service;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 import org.aeh.lab13.model.User;
 import org.aeh.lab13.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
@@ -13,9 +16,12 @@ import java.util.Optional;
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder; // BCrypt
 
-    public UserService(UserRepository userRepository) {
+    @Autowired
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) { // Constructor Injection
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public Optional<User> findByUsername(String username) {
@@ -26,14 +32,14 @@ public class UserService implements UserDetailsService {
         if (userRepository.findByEmail(email).isPresent()) {
             throw new IllegalArgumentException("Email is already registered!");
         }
+
         User user = new User();
         user.setUsername(username);
         user.setEmail(email);
-        user.setPassword("{noop}" + password); // NOOP prefix added to disable hashing
+        user.setPassword(passwordEncoder.encode(password));
+
         userRepository.save(user);
     }
-
-
 
     public boolean authenticateUser(String username, String rawPassword) {
         Optional<User> userOptional = userRepository.findByUsername(username);
@@ -43,7 +49,7 @@ public class UserService implements UserDetailsService {
             System.out.println("Stored Password: " + user.getPassword());
             System.out.println("Entered Password: " + rawPassword);
 
-            boolean isMatch = rawPassword.equals(user.getPassword());
+            boolean isMatch = passwordEncoder.matches(rawPassword, user.getPassword());
             System.out.println("Password Match Result: " + isMatch);
 
             return isMatch;
@@ -63,4 +69,6 @@ public class UserService implements UserDetailsService {
                 .build();
     }
 }
+
+
 

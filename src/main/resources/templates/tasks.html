@@ -2,30 +2,78 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>User Tasks</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h2 { color: #333; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-    </style>
+    <title>Notes Manager</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-<h2>Your Tasks</h2>
-<table>
+
+<h2>Notes</h2>
+
+
+<table border="1">
+    <thead>
     <tr>
         <th>ID</th>
         <th>Title</th>
-        <th>Description</th>
-        <th>Status</th>
+        <th>Content</th>
+        <th>Created At</th>
     </tr>
-    <tr th:each="task : ${tasks}">
-        <td th:text="${task.id}"></td>
-        <td th:text="${task.title}"></td>
-        <td th:text="${task.description}"></td>
-        <td th:text="${task.status}"></td>
-    </tr>
+    </thead>
+    <tbody id="notesTable">
+
+    </tbody>
 </table>
+
+
+<h3>Add New Note</h3>
+<form id="addNoteForm">
+    <label>Title: <input type="text" id="title"></label><br>
+    <label>Content: <textarea id="content"></textarea></label><br>
+    <button type="submit">Add Note</button>
+</form>
+
+
+<script>
+    $(document).ready(function() {
+        function loadNotes() {
+            $.get("/notes", function(notes) {
+                $("#notesTable").empty();
+                notes.forEach(function(note) {
+                    $("#notesTable").append(
+                        `<tr>
+                        <td>${note.id}</td>
+                        <td>${note.title}</td>
+                        <td>${note.content}</td>
+                        <td>${note.created_at}</td>
+                    </tr>`
+                    );
+                });
+            });
+        }
+
+        $("#addNoteForm").submit(function(event) {
+            event.preventDefault();
+            const newNote = {
+                title: $("#title").val(),
+                content: $("#content").val(),
+                user_id: 1  // Test için user_id = 1 veriyoruz
+            };
+            $.ajax({
+                type: "POST",
+                url: "/notes",
+                contentType: "application/json",
+                data: JSON.stringify(newNote),
+                success: function() {
+                    loadNotes();
+                    $("#title").val("");
+                    $("#content").val("");
+                }
+            });
+        });
+
+        loadNotes();
+    });
+</script>
+
 </body>
 </html>

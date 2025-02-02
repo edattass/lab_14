@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Create a Meow Note</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+    <h1>Create a Meow Note</h1>
+    <form action="/notes" method="post">
+        <div class="form-group">
+            <label>Title:</label>
+            <input type="text" class="form-control" name="title" required>
+        </div>
+        <div class="form-group">
+            <label>Content:</label>
+            <textarea class="form-control" name="content" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+        <a href="/" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+</body>
+</html>
+
